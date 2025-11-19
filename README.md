@@ -15,16 +15,23 @@ MCP Appium은 Appium을 MCP(Model Context Protocol) 서버로 제공하여, AI �
 
 ### 1. 설치
 
+**방법 1: 원클릭 설치 (추천)**
 ```bash
-# 저장소 클론
-git clone <repository-url>
-cd mcp-appium
+curl -sSL https://raw.githubusercontent.com/supremehyo/appium-mcp-claude-android/main/install-remote.sh | bash
+```
 
-# 자동 설치 및 등록 (macOS/Linux)
+**방법 2: 저장소 클론 후 설치**
+```bash
+git clone https://github.com/supremehyo/appium-mcp-claude-android.git
+cd appium-mcp-claude-android
 chmod +x install.sh
 ./install.sh
+```
 
-# 또는 수동 설치 (모든 플랫폼)
+**방법 3: 수동 설치 (Windows)**
+```bash
+git clone https://github.com/supremehyo/appium-mcp-claude-android.git
+cd appium-mcp-claude-android
 pip install -e .
 python -m mcp_appium.installer
 ```
