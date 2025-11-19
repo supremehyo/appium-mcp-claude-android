@@ -38,15 +38,17 @@ class AppiumBridge:
         self.current_nodes: List[NodeSnapshot] = []
 
     # Connection --------------------------------------------------------------
-    def connect(self) -> None:
+    def connect(self, max_retries: int = 3, retry_delay: int = 2) -> None:
         if self.driver:
             try:
-                # Test if the existing connection is still valid
-                self.driver.current_activity
+                # Test if the existing connection is still valid using session_id
+                # This is more reliable than current_activity which requires an active app
+                _ = self.driver.session_id
+                logger.info("Existing connection is valid (session: %s)", self.driver.session_id)
                 return
-            except Exception:
+            except Exception as e:
                 # Connection is stale, disconnect and reconnect
-                logger.warning("Existing driver connection is stale, reconnecting...")
+                logger.warning("Existing driver connection is stale (%s), reconnecting...", str(e))
                 try:
                     self.driver.quit()
                 except:
@@ -69,7 +71,25 @@ class AppiumBridge:
         # Load capabilities into options
         options.load_capabilities(caps)
 
-        self.driver = webdriver.Remote(self.config.server_url, options=options)
+        # Retry logic for connection stability
+        last_error = None
+        for attempt in range(max_retries):
+            try:
+                logger.info("Connection attempt %d/%d", attempt + 1, max_retries)
+                self.driver = webdriver.Remote(self.config.server_url, options=options)
+                logger.info("Successfully connected to device (session: %s)", self.driver.session_id)
+                return
+            except Exception as e:
+                last_error = e
+                logger.warning("Connection attempt %d failed: %s", attempt + 1, str(e))
+                if attempt < max_retries - 1:
+                    logger.info("Retrying in %d seconds...", retry_delay)
+                    time.sleep(retry_delay)
+                else:
+                    logger.error("All %d connection attempts failed", max_retries)
+
+        # If all retries failed, raise the last error
+        raise RuntimeError(f"Failed to connect after {max_retries} attempts: {last_error}") from last_error
 
     def disconnect(self) -> None:
         if self.driver:
@@ -100,9 +120,13 @@ class AppiumBridge:
                 stderr=subprocess.PIPE,
                 text=True,
                 check=False,
+                timeout=10,  # Add timeout to prevent hanging
             )
         except FileNotFoundError as exc:  # pragma: no cover - depends on adb
             logger.error("ADB binary not found: %s", exc)
+            return ""
+        except subprocess.TimeoutExpired:
+            logger.error("adb dumpsys timed out after 10 seconds")
             return ""
 
         if result.returncode != 0:

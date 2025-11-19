@@ -7,9 +7,11 @@
     "udid": "AUTO_DETECT",
     "noReset": true,
     "dontStopAppOnReset": true,
-    "skipDeviceInitialization": false,
-    "skipServerInstallation": false,
-    "newCommandTimeout": 300
+    "skipDeviceInitialization": true,
+    "skipServerInstallation": true,
+    "newCommandTimeout": 600,
+    "uiautomator2ServerInstallTimeout": 60000,
+    "adbExecTimeout": 20000
   },
   "adb_binary": "adb",
   "use_accessibility_dump": false,
