@@ -28,11 +28,12 @@ def register_with_claude_code():
         # Get Python executable path
         python_path = sys.executable
 
-        # Register the MCP server using claude mcp add
+        # Register the MCP server using claude mcp add with --global flag
         cmd = [
             "claude",
             "mcp",
             "add",
+            "--global",
             "--transport", "stdio",
             "appium",
             "--",
@@ -41,7 +42,7 @@ def register_with_claude_code():
             "mcp_appium.server",
         ]
 
-        print(f"Registering MCP server with Claude Code...")
+        print(f"Registering MCP server globally with Claude Code...")
         print(f"Command: {' '.join(cmd)}")
 
         result = subprocess.run(
