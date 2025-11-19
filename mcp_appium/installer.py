@@ -28,6 +28,24 @@ def register_with_claude_code():
         # Get Python executable path
         python_path = sys.executable
 
+        # Check if already registered
+        check_cmd = ["claude", "mcp", "list"]
+        try:
+            result = subprocess.run(
+                check_cmd,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            if "appium" in result.stdout:
+                print("ℹ️  MCP server 'appium' is already registered.")
+                print("\nIf you want to update it, run:")
+                print("  claude mcp remove appium")
+                print("  mcp-appium-install")
+                return True
+        except:
+            pass  # Ignore errors from list command
+
         # Register the MCP server using claude mcp add
         cmd = [
             "claude",
@@ -46,31 +64,48 @@ def register_with_claude_code():
 
         result = subprocess.run(
             cmd,
-            check=True,
             capture_output=True,
             text=True,
+            check=False,
         )
 
-        print("✅ MCP server registered successfully!")
-        print("\nYou can now use the following MCP tools in Claude Code:")
-        print("  - setup_appium_connection: Auto-setup Appium and connect to device")
-        print("  - list_devices: List connected Android devices")
-        print("  - start_appium_server: Start Appium server")
-        print("  - stop_appium_server: Stop Appium server")
-        print("  - get_screen_elements: Get current screen elements")
-        print("  - execute_action: Execute mobile actions")
-        print("  - run_test_scenario: Run automated test scenarios")
+        if result.returncode == 0:
+            print("✅ MCP server registered successfully!")
+            print("\nYou can now use the following MCP tools in Claude Code:")
+            print("  - setup_appium_connection: Auto-setup Appium and connect to device")
+            print("  - list_devices: List connected Android devices")
+            print("  - start_appium_server: Start Appium server")
+            print("  - stop_appium_server: Stop Appium server")
+            print("  - get_screen_elements: Get current screen elements")
+            print("  - execute_action: Execute mobile actions")
+            print("  - run_test_scenario: Run automated test scenarios")
+            return True
+        else:
+            # Check if error is "already exists"
+            if "already exists" in result.stderr:
+                print("ℹ️  MCP server 'appium' is already registered.")
+                print("\nTo update, run:")
+                print("  claude mcp remove appium")
+                print("  mcp-appium-install")
+                return True
+            else:
+                print(f"⚠️  Warning: Failed to register MCP server automatically")
+                print(f"stderr: {result.stderr}")
+                print("\nYou can register manually with:")
+                print(f"  claude mcp add --transport stdio appium -- {python_path} -m mcp_appium.server")
+                return True  # Still return True as installation itself succeeded
 
-        return True
-
-    except subprocess.CalledProcessError as e:
-        print(f"❌ Failed to register MCP server: {e}")
-        print(f"stderr: {e.stderr}")
-        return False
     except FileNotFoundError:
-        print("❌ 'claude' command not found.")
+        print("⚠️  'claude' command not found.")
         print("Please ensure Claude Code CLI is installed and in your PATH.")
-        return False
+        print("\nYou can register manually later with:")
+        print("  claude mcp add --transport stdio appium -- python3 -m mcp_appium.server")
+        return True  # Still return True as installation itself succeeded
+    except Exception as e:
+        print(f"⚠️  Warning: Unexpected error during registration: {e}")
+        print("\nYou can register manually with:")
+        print("  claude mcp add --transport stdio appium -- python3 -m mcp_appium.server")
+        return True  # Still return True as installation itself succeeded
 
 
 def unregister_from_claude_code():
