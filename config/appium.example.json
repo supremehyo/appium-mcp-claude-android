@@ -1,0 +1,18 @@
+{
+  "server_url": "http://127.0.0.1:4723",
+  "capabilities": {
+    "platformName": "Android",
+    "automationName": "UiAutomator2",
+    "deviceName": "Android Device",
+    "udid": "AUTO_DETECT",
+    "noReset": true,
+    "dontStopAppOnReset": true,
+    "skipDeviceInitialization": false,
+    "skipServerInstallation": false,
+    "newCommandTimeout": 300
+  },
+  "adb_binary": "adb",
+  "use_accessibility_dump": false,
+  "auto_start_appium": true,
+  "appium_log_file": "appium.log"
+}
