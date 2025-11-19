@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "appium": {
+      "type": "stdio",
+      "command": "python3",
+      "args": ["-m", "mcp_appium.server"]
+    }
+  }
+}

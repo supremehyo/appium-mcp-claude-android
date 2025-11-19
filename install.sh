@@ -1,10 +1,10 @@
 #!/bin/bash
-# Quick installation script for mcp-appium
+# Installation script for mcp-appium
 
 set -e
 
 echo "=========================================="
-echo "MCP Appium - Quick Installer"
+echo "MCP Appium - Installer"
 echo "=========================================="
 echo ""
 
@@ -41,24 +41,38 @@ else
 fi
 
 if ! command -v appium &> /dev/null; then
-    echo "⚠️  Appium not found. Installing now..."
+    echo "⚠️  Appium not found."
     if command -v npm &> /dev/null; then
+        echo "   Installing Appium..."
         npm install -g appium
         appium driver install uiautomator2
         echo "✅ Appium installed"
     else
-        echo "❌ npm not found. Please install Node.js and npm first."
-        echo "   Visit: https://nodejs.org/"
-        exit 1
+        echo "   Please install Node.js and npm first, then run:"
+        echo "   npm install -g appium"
+        echo "   appium driver install uiautomator2"
     fi
 else
     echo "✅ Appium found: $(appium --version)"
 fi
 
-# Register with Claude Code
+# Create .mcp.json in current directory
 echo ""
-echo "📝 Registering MCP server with Claude Code..."
-python3 -m mcp_appium.installer
+echo "📝 Creating .mcp.json for this project..."
+PYTHON_PATH=$(which python3)
+cat > .mcp.json <<EOF
+{
+  "mcpServers": {
+    "appium": {
+      "type": "stdio",
+      "command": "$PYTHON_PATH",
+      "args": ["-m", "mcp_appium.server"]
+    }
+  }
+}
+EOF
+
+echo "✅ Created .mcp.json"
 
 echo ""
 echo "=========================================="
@@ -66,8 +80,11 @@ echo "Installation Complete! 🎉"
 echo "=========================================="
 echo ""
 echo "📝 Next steps:"
-echo "  1. Restart Claude Code"
-echo "  2. Connect an Android device or start an emulator"
-echo "  3. In Claude Code, say: 'Setup Appium and connect to my device'"
+echo "  1. Open Claude Code in THIS directory"
+echo "  2. Claude Code will automatically detect .mcp.json"
+echo "  3. Approve the MCP server when prompted"
+echo "  4. Connect an Android device or start an emulator"
+echo "  5. In Claude Code, say: 'Setup Appium and connect to my device'"
 echo ""
-echo "💡 Tip: Use '/mcp list' to verify the server is registered"
+echo "💡 Tip: The MCP server is configured for THIS project only"
+echo "   If you want to use it in other projects, copy .mcp.json there"

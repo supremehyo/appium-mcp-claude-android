@@ -70,10 +70,23 @@ else
     echo "✅ Appium found: $(appium --version)"
 fi
 
-# Register with Claude Code
+# Create .mcp.json in installation directory
 echo ""
-echo "📝 Registering MCP server with Claude Code..."
-python3 -m mcp_appium.installer
+echo "📝 Creating .mcp.json for MCP server configuration..."
+PYTHON_PATH=$(which python3)
+cat > "$INSTALL_DIR/.mcp.json" <<EOF
+{
+  "mcpServers": {
+    "appium": {
+      "type": "stdio",
+      "command": "$PYTHON_PATH",
+      "args": ["-m", "mcp_appium.server"]
+    }
+  }
+}
+EOF
+
+echo "✅ Created .mcp.json"
 
 echo ""
 echo "=========================================="
@@ -81,10 +94,13 @@ echo "Installation Complete! 🎉"
 echo "=========================================="
 echo ""
 echo "📝 Next steps:"
-echo "  1. Restart Claude Code"
-echo "  2. Connect an Android device or start an emulator"
-echo "  3. In Claude Code, say: 'Setup Appium and connect to my device'"
+echo "  1. Navigate to the installation directory: cd $INSTALL_DIR"
+echo "  2. Open Claude Code in that directory"
+echo "  3. Claude Code will automatically detect .mcp.json"
+echo "  4. Approve the MCP server when prompted"
+echo "  5. Connect an Android device or start an emulator"
+echo "  6. Say: 'Setup Appium and connect to my device'"
 echo ""
-echo "💡 Verify: Run 'claude mcp list' to see the 'appium' server"
+echo "💡 Tip: To use in other projects, copy .mcp.json from $INSTALL_DIR"
 echo ""
 echo "📚 Documentation: $INSTALL_DIR/README.md"
