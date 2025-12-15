@@ -15,7 +15,8 @@ cd mcp-appium
 
 설치 스크립트가 자동으로:
 - ✅ Python 패키지 설치
-- ✅ Appium 설치 (npm이 있다면)
+- ✅ Node.js/npm 설치 시도 (가능한 경우)
+- ✅ Appium + uiautomator2 설치 (가능한 경우)
 - ✅ Claude Code MCP 서버 등록
 
 ### 2단계: Claude Code 재시작 (10초)
@@ -111,9 +112,16 @@ claude mcp list
 # Appium이 설치되어 있는지 확인
 appium --version
 
-# 없다면 설치
-npm install -g appium
-appium driver install uiautomator2
+# 없다면 자동 설치(권장)
+# macOS/Linux
+mcp-appium-install --install-node --install-appium
+
+# Windows
+mcp-appium-install --install-deps -y
+
+# 또는 수동 설치
+# npm install -g appium
+# appium driver install uiautomator2
 ```
 
 ### 기기가 감지되지 않음

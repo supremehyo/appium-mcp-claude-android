@@ -148,6 +148,15 @@ brew install android-platform-tools
 
 Node.js와 Appium이 필요합니다.
 
+**자동 설치(권장):**
+```bash
+# macOS/Linux
+mcp-appium-install --install-node --install-appium
+
+# Windows
+mcp-appium-install --install-deps -y
+```
+
 **Node.js 설치:**
 - https://nodejs.org/ 에서 다운로드
 
@@ -155,6 +164,12 @@ Node.js와 Appium이 필요합니다.
 ```bash
 npm install -g appium
 appium driver install uiautomator2
+```
+
+**전역 설치 대신 로컬 설치(권한/충돌 회피):**
+```bash
+npm install appium
+npx appium driver install uiautomator2
 ```
 
 ### "No devices found"

@@ -6,6 +6,16 @@ set -e
 
 REPO_URL="https://github.com/supremehyo/appium-mcp-claude-android.git"
 INSTALL_DIR="$HOME/.mcp-appium"
+AUTO_YES="${MCP_APPIUM_YES:-}"
+
+confirm() {
+    local prompt="$1"
+    if [[ "$AUTO_YES" == "1" || "$AUTO_YES" == "y" || "$AUTO_YES" == "Y" ]]; then
+        return 0
+    fi
+    read -r -p "$prompt (y/N): " response
+    [[ "$response" == "y" || "$response" == "Y" ]]
+}
 
 echo "=========================================="
 echo "MCP Appium - Remote Installer"
@@ -32,6 +42,16 @@ echo ""
 if [ -d "$INSTALL_DIR" ]; then
     echo "📦 Updating existing installation..."
     cd "$INSTALL_DIR"
+    if [ -n "$(git status --porcelain 2>/dev/null)" ]; then
+        echo "⚠️  Existing installation has local changes."
+        echo "   To discard them and continue, re-run with: MCP_APPIUM_CLEAN=1"
+        if [[ "${MCP_APPIUM_CLEAN:-}" == "1" ]] || confirm "Discard local changes (git reset --hard && git clean -fd)?"; then
+            git reset --hard
+            git clean -fd
+        else
+            exit 1
+        fi
+    fi
     git pull
 else
     echo "📦 Cloning repository..."
@@ -54,39 +74,31 @@ else
     echo "✅ adb found"
 fi
 
-if ! command -v appium &> /dev/null; then
-    echo "⚠️  Appium not found."
-    if command -v npm &> /dev/null; then
-        echo "   Installing Appium..."
-        npm install -g appium
-        appium driver install uiautomator2
-        echo "✅ Appium installed"
-    else
-        echo "   Please install Node.js and npm first, then run:"
-        echo "   npm install -g appium"
-        echo "   appium driver install uiautomator2"
-    fi
-else
-    echo "✅ Appium found: $(appium --version)"
+INSTALLER_ARGS=(--no-register --install-node --install-appium)
+if [[ "${AUTO_YES:-}" == "1" || "${AUTO_YES:-}" == "y" || "${AUTO_YES:-}" == "Y" ]]; then
+    INSTALLER_ARGS+=(-y)
 fi
+python3 -m mcp_appium.installer "${INSTALLER_ARGS[@]}"
 
-# Create .mcp.json in installation directory
+# Ensure .mcp.json exists (repo includes a default one).
 echo ""
-echo "📝 Creating .mcp.json for MCP server configuration..."
-PYTHON_PATH=$(which python3)
-cat > "$INSTALL_DIR/.mcp.json" <<EOF
+if [ -f "$INSTALL_DIR/.mcp.json" ]; then
+    echo "✅ .mcp.json already exists"
+else
+    echo "📝 Creating .mcp.json for MCP server configuration..."
+    cat > "$INSTALL_DIR/.mcp.json" <<'EOF'
 {
   "mcpServers": {
     "appium": {
       "type": "stdio",
-      "command": "$PYTHON_PATH",
+      "command": "python3",
       "args": ["-m", "mcp_appium.server"]
     }
   }
 }
 EOF
-
-echo "✅ Created .mcp.json"
+    echo "✅ Created .mcp.json"
+fi
 
 echo ""
 echo "=========================================="

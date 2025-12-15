@@ -40,39 +40,31 @@ else
     echo "✅ adb found"
 fi
 
-if ! command -v appium &> /dev/null; then
-    echo "⚠️  Appium not found."
-    if command -v npm &> /dev/null; then
-        echo "   Installing Appium..."
-        npm install -g appium
-        appium driver install uiautomator2
-        echo "✅ Appium installed"
-    else
-        echo "   Please install Node.js and npm first, then run:"
-        echo "   npm install -g appium"
-        echo "   appium driver install uiautomator2"
-    fi
-else
-    echo "✅ Appium found: $(appium --version)"
+INSTALLER_ARGS=(--no-register --install-node --install-appium)
+if [[ "${MCP_APPIUM_YES:-}" == "1" || "${MCP_APPIUM_YES:-}" == "y" || "${MCP_APPIUM_YES:-}" == "Y" ]]; then
+    INSTALLER_ARGS+=(-y)
 fi
+python3 -m mcp_appium.installer "${INSTALLER_ARGS[@]}"
 
-# Create .mcp.json in current directory
+# Ensure .mcp.json exists (repo includes a default one).
 echo ""
-echo "📝 Creating .mcp.json for this project..."
-PYTHON_PATH=$(which python3)
-cat > .mcp.json <<EOF
+if [ -f ".mcp.json" ]; then
+    echo "✅ .mcp.json already exists"
+else
+    echo "📝 Creating .mcp.json for this project..."
+    cat > .mcp.json <<'EOF'
 {
   "mcpServers": {
     "appium": {
       "type": "stdio",
-      "command": "$PYTHON_PATH",
+      "command": "python3",
       "args": ["-m", "mcp_appium.server"]
     }
   }
 }
 EOF
-
-echo "✅ Created .mcp.json"
+    echo "✅ Created .mcp.json"
+fi
 
 echo ""
 echo "=========================================="

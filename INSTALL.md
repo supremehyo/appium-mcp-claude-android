@@ -24,6 +24,11 @@
    python -m mcp_appium.installer
    ```
 
+   **Windows (one-liner, auto-install deps):**
+   ```bash
+   py -m pip install mcp-appium && mcp-appium-install --install-deps -y
+   ```
+
 3. **Restart Claude Code**
 
 4. **Verify installation**
@@ -47,6 +52,12 @@ npm install -g appium
 # Install UiAutomator2 driver
 appium driver install uiautomator2
 ```
+
+Notes:
+- On macOS/Linux, `./install.sh` (and `install-remote.sh`) will try to install Node.js/npm via Homebrew or your Linux package manager when missing.
+- If you installed only via `pip`, you can automate setup with:
+  - macOS/Linux: `mcp-appium-install --install-node --install-appium`
+  - Windows: `mcp-appium-install --install-deps -y`
 
 **Android SDK Platform-Tools (for adb):**
 - Download from: https://developer.android.com/studio/releases/platform-tools

@@ -7,6 +7,7 @@ import subprocess
 import time
 import signal
 import os
+import shutil
 import requests
 from typing import Optional
 from pathlib import Path
@@ -33,6 +34,17 @@ class AppiumServerManager:
     def server_url(self) -> str:
         """Get the server URL."""
         return f"http://{self.host}:{self.port}"
+
+    def _resolve_appium_cmd(self) -> list[str] | None:
+        appium_path = shutil.which("appium")
+        if appium_path:
+            return ["appium"]
+
+        npx_path = shutil.which("npx")
+        if npx_path:
+            return ["npx", "--no-install", "appium"]
+
+        return None
 
     def is_running(self) -> bool:
         """Check if Appium server is running."""
@@ -62,9 +74,20 @@ class AppiumServerManager:
 
         logger.info(f"Starting Appium server at {self.server_url}...")
 
+        appium_cmd = self._resolve_appium_cmd()
+        if not appium_cmd:
+            logger.error(
+                "Appium not found. Install prerequisites, then Appium:\n"
+                "  - Node.js: https://nodejs.org/\n"
+                "  - Global: npm install -g appium && appium driver install uiautomator2\n"
+                "  - Local:  npm install appium && npx appium driver install uiautomator2\n"
+                "Or run: mcp-appium-install --install-node --install-appium (Windows: --install-deps -y)"
+            )
+            return False
+
         # Prepare command
         cmd = [
-            "appium",
+            *appium_cmd,
             "--address", self.host,
             "--port", str(self.port),
             "--base-path", self.base_path,
@@ -101,13 +124,6 @@ class AppiumServerManager:
             self.stop()
             return False
 
-        except FileNotFoundError:
-            logger.error(
-                "Appium not found. Please install it: npm install -g appium"
-            )
-            if log_handle:
-                log_handle.close()
-            return False
         except Exception as e:
             logger.error(f"Failed to start Appium server: {e}")
             if log_handle:

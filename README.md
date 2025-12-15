@@ -28,6 +28,11 @@ curl -sSL https://raw.githubusercontent.com/supremehyo/appium-mcp-claude-android
 # 설치 후: cd ~/.mcp-appium
 ```
 
+**Windows (한 줄 자동 설치):**
+```bat
+py -m pip install mcp-appium && mcp-appium-install --install-deps -y
+```
+
 ### 2. Claude Code에서 열기
 
 ```bash
@@ -62,6 +67,12 @@ npm install -g appium
 # UiAutomator2 드라이버 설치
 appium driver install uiautomator2
 ```
+
+> 전역 설치가 부담스럽다면(권한/충돌 등) 로컬 설치도 가능합니다: `npm install appium` 후 `npx appium ...`로 실행합니다.  
+> 이 프로젝트는 `appium`이 PATH에 없으면 `npx --no-install appium`도 자동으로 시도합니다.
+
+> 참고: macOS/Linux에서는 `./install.sh` / `install-remote.sh`가 Node.js/npm이 없으면(Homebrew/apt 등 사용 가능 시) 설치를 시도합니다.  
+> pip로만 설치했다면 macOS/Linux는 `mcp-appium-install --install-node --install-appium`, Windows는 `mcp-appium-install --install-deps -y`로 설치를 자동화할 수 있습니다.
 
 ### 2. Android SDK 및 ADB 설치
 
